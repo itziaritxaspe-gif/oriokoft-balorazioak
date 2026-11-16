@@ -1,68 +1,78 @@
 import { createSign } from 'node:crypto';
 
-const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID;
-const SA_EMAIL = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-const SA_KEY = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
-const json = (obj, status=200) => new Response(JSON.stringify(obj), {status, headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
-const enc = (s) => Buffer.from(JSON.stringify(s)).toString('base64url');
+const SHEET_ID = process.env.GOOGLE_SHEET_ID;
+const EMAIL = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+const PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+const reply = (obj, status=200) => new Response(JSON.stringify(obj), {status, headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
+const b64 = x => Buffer.from(JSON.stringify(x)).toString('base64url');
 
 async function token() {
-  if (!SPREADSHEET_ID || !SA_EMAIL || !SA_KEY) throw new Error('Netlify ingurune-aldagaiak falta dira.');
+  if (!SHEET_ID || !EMAIL || !PRIVATE_KEY) throw Error('Google konfigurazioa falta da');
   const now = Math.floor(Date.now()/1000);
-  const input = `${enc({alg:'RS256',typ:'JWT'})}.${enc({iss:SA_EMAIL,scope:'https://www.googleapis.com/auth/spreadsheets',aud:'https://oauth2.googleapis.com/token',iat:now,exp:now+3500})}`;
-  const sig = createSign('RSA-SHA256').update(input).sign(SA_KEY).toString('base64url');
-  const body = new URLSearchParams({grant_type:'urn:ietf:params:oauth:grant-type:jwt-bearer',assertion:`${input}.${sig}`});
+  const unsigned = `${b64({alg:'RS256',typ:'JWT'})}.${b64({iss:EMAIL,scope:'https://www.googleapis.com/auth/spreadsheets',aud:'https://oauth2.googleapis.com/token',iat:now,exp:now+3300})}`;
+  const sig = createSign('RSA-SHA256').update(unsigned).sign(PRIVATE_KEY).toString('base64url');
+  const body = new URLSearchParams({grant_type:'urn:ietf:params:oauth:grant-type:jwt-bearer',assertion:`${unsigned}.${sig}`});
   const r = await fetch('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});
-  if (!r.ok) throw new Error('Google autentifikazioak huts egin du: '+r.status);
+  if (!r.ok) throw Error('Google token: '+r.status);
   return (await r.json()).access_token;
 }
-async function sheet(range, accessToken, opts={}) {
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(SPREADSHEET_ID)}/values/${encodeURIComponent(range)}${opts.append?':append':''}`+(opts.append?'?valueInputOption=RAW&insertDataOption=INSERT_ROWS':'');
-  const response = await fetch(url,{method:opts.append?'POST':'GET',headers:{Authorization:`Bearer ${accessToken}`,...(opts.append?{'Content-Type':'application/json'}:{})},...(opts.append?{body:JSON.stringify({values:opts.values})}:{})});
-  if (!response.ok) {
-  const detalle = await response.json().catch(() => ({}));
-  console.error('Google Sheets API:', {
-    status: response.status,
-    code: detalle.error?.code,
-    reason: detalle.error?.errors?.[0]?.reason,
-    message: detalle.error?.message
-  });
-  throw new Error('Google Sheets errorea: ' + response.status);
+async function values(range, auth) {
+  const u = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(SHEET_ID)}/values/${encodeURIComponent(range)}`;
+  const r = await fetch(u,{headers:{Authorization:`Bearer ${auth}`}});
+  if (!r.ok) {console.error('Google Sheets read error:',r.status);throw Error('Google Sheets read: '+r.status);}
+  return (await r.json()).values ?? [];
 }
-  return response.json();
+async function append(range, rows, auth) {
+  const u = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(SHEET_ID)}/values/${encodeURIComponent(range)}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`;
+  const r = await fetch(u,{method:'POST',headers:{Authorization:`Bearer ${auth}`,'Content-Type':'application/json'},body:JSON.stringify({values:rows})});
+  if (!r.ok) {console.error('Google Sheets write error:',r.status);throw Error('Google Sheets write: '+r.status);}
+}
+function parseDate(x) {
+  const s=String(x??'').trim();
+  let m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s|$)/);
+  let year,month,day;
+  if(m) {day=+m[1];month=+m[2];year=+m[3];}
+  else {m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:T|\s|$)/);if(!m)return null;year=+m[1];month=+m[2];day=+m[3];}
+  const d=new Date(Date.UTC(year,month-1,day));
+  if(d.getUTCFullYear()!==year||d.getUTCMonth()+1!==month||d.getUTCDate()!==day) return null;
+  return `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+}
+function todayMadrid() {
+  const parts=Object.fromEntries(new Intl.DateTimeFormat('en-US',{timeZone:'Europe/Madrid',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).map(x=>[x.type,x.value]));
+  return `${parts.year}-${parts.month}-${parts.day}`;
 }
 function sanitize(x) {
-  let s = String(x??'').trim().slice(0,1000);
-  // Inhibit formula interpretation even if exported elsewhere.
-  if(/^[=+\-@\t\r]/.test(s)) s="'"+s;
+  let s=String(x??'').trim().slice(0,1000);
+  if(/^[=+\-@\t\r]/.test(s))s="'"+s;
   return s;
 }
-async function openGames(auth) {
-  const result = await sheet('Partidak!A2:D',auth);
-  return (result.values??[]).filter(r=>String(r[3]??'').trim().toUpperCase()==='IREKITA' && r[0] && r[1])
-  .map(r=>({id:String(r[0]).trim(),izena:String(r[1]).trim()}));
+async function loadData(auth) {
+  const [teamRows,gameRows] = await Promise.all([values('Taldeak!A2:B',auth),values('Partidak!A2:E',auth)]);
+  const taldeak=teamRows.filter(r=>r[0]&&r[1]).map(r=>({id:String(r[0]).trim(),izena:String(r[1]).trim()}));
+  const validTeams=new Set(taldeak.map(t=>t.id));
+  const now=todayMadrid();
+  const partidak=gameRows.filter(r=>r[0]&&r[1]&&String(r[3]??'').trim().toUpperCase()==='IREKITA')
+   .map(r=>({id:String(r[0]).trim(),izena:String(r[1]).trim(),data:String(r[2]??''),dataISO:parseDate(r[2]),taldeId:String(r[4]??'').trim()}))
+   .filter(p=>validTeams.has(p.taldeId)&&p.dataISO&&p.dataISO<=now)
+   .sort((a,b)=>b.dataISO.localeCompare(a.dataISO)||a.id.localeCompare(b.id));
+  return {taldeak,partidak};
 }
-export default async (request) => {
+export default async function handler(request) {
+  if(!['GET','POST'].includes(request.method))return reply({error:'Metodoa ez da onartzen'},405);
   try {
-    if(request.method!=='GET' && request.method!=='POST') return json({error:'Metodoa ez da onartzen'},405);
-    const auth = await token();
-    if(request.method==='GET') return json({partidak:await openGames(auth)});
-    const limit = Number(request.headers.get('content-length')??0);
-    if(limit>8000) return json({error:'Mezua luzeegia da'},413);
-    const raw = await request.text();
-    if(raw.length>8000) return json({error:'Mezua luzeegia da'},413);
-    let d; try {d=JSON.parse(raw);} catch {return json({error:'JSON okerra'},400);}
-    if(!d || typeof d!=='object') return json({error:'Datu okerrak'},400);
-    const fields=['ahalegina','jarduna','taktika','taldea'];
-    if(fields.some(k=>!Number.isInteger(d[k]) || d[k]<1 || d[k]>5)) return json({error:'Balorazioak 1etik 5era izan behar dira'},400);
-    if(!['Oso ondo','Ondo','Hala-hola','Gaizki'].includes(d.sentsazioa)) return json({error:'Sentsazioa aukeratu'},400);
-    const games=await openGames(auth);
-    const game=games.find(g=>g.id===String(d.partidaId??''));
-    if(!game) return json({error:'Partida itxita dago edo ez da existitzen'},400);
-    await sheet('Erantzunak!A:J',auth,{append:true,values:[[game.id,game.izena,d.ahalegina,d.jarduna,d.taktika,d.taldea,d.sentsazioa,sanitize(d.ondo),sanitize(d.hobetu),sanitize(d.oharrak)]]});
-    return json({ok:true});
-  } catch(err) {
-    console.error('API error',err);
-    return json({error:'Zerbitzariaren errorea. Egiaztatu konfigurazioa edo saiatu berriro.'},500);
-  }
-};
+    const auth=await token();
+    const model=await loadData(auth);
+    if(request.method==='GET')return reply(model);
+    if(Number(request.headers.get('content-length')??0)>8000)return reply({error:'Mezua luzeegia da'},413);
+    const raw=await request.text();
+    if(raw.length>8000)return reply({error:'Mezua luzeegia da'},413);
+    let d;try{d=JSON.parse(raw);}catch{return reply({error:'JSON okerra'},400);}
+    if(!d||typeof d!=='object'||Array.isArray(d))return reply({error:'Datu okerrak'},400);
+    const game=model.partidak.find(g=>g.id===d.partidaId && g.taldeId===d.taldeId);
+    if(!game)return reply({error:'Partida itxita dago edo ez da talde honetakoa'},400);
+    if(['ahalegina','jarduna','taktika','taldea'].some(k=>!Number.isInteger(d[k])||d[k]<1||d[k]>5))return reply({error:'Balorazioak 1etik 5era izan behar dira'},400);
+    if(!['Oso ondo','Ondo','Hala-hola','Gaizki'].includes(d.sentsazioa))return reply({error:'Sentsazioa aukeratu'},400);
+    await append('Erantzunak!A:K',[[game.id,game.izena,d.ahalegina,d.jarduna,d.taktika,d.taldea,d.sentsazioa,sanitize(d.ondo),sanitize(d.hobetu),sanitize(d.oharrak),game.taldeId]],auth);
+    return reply({ok:true});
+  } catch(err) {console.error('API error:',err.message);return reply({error:'Zerbitzariaren errorea. Egiaztatu konfigurazioa.'},500);}
+}
