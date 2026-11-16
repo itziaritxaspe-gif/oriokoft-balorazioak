@@ -1,26 +1,44 @@
 
 <!doctype html>
 <html lang="eu">
+
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#113a58">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1">
+
+  <meta name="theme-color" content="#171717">
 
   <title>Orioko FT · Partida osteko balorazioa</title>
 
-  <!-- Mugikorreko aplikazioa -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Orioko FT">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <!-- MUGIKORREKO APLIKAZIOA -->
+  <meta name="apple-mobile-web-app-capable"
+        content="yes">
+  <meta name="apple-mobile-web-app-title"
+        content="Orioko FT">
+  <meta name="apple-mobile-web-app-status-bar-style"
+        content="default">
 
-  <link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png">
-  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon"
+        sizes="180x180"
+        href="/icon-180.png">
+
+  <link rel="manifest"
+        href="/manifest.webmanifest">
 
   <style>
+
+    /* KOLOREAK */
+
     :root {
-      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-      color: #1b2a3a;
-      background: #f4f7fa;
+      --orio-horia: #f2c500;
+      --orio-beltza: #171717;
+      --orio-grisa: #f7f7f4;
+
+      font-family: system-ui, -apple-system,
+                   "Segoe UI", sans-serif;
+      color: #222222;
+      background: var(--orio-grisa);
     }
 
     * {
@@ -31,29 +49,64 @@
       margin: 0;
     }
 
+    /* EDUKIONTZIA */
+
     .wrap {
       max-width: 600px;
       margin: 26px auto;
       padding: 0 16px;
     }
 
+    /* GOIBURUA */
+
     .hero {
-      background: #113a58;
+      background: var(--orio-beltza);
       color: white;
-      padding: 26px;
+      padding: 27px;
       border-radius: 19px 19px 0 0;
+      border-bottom: 5px solid var(--orio-horia);
+    }
+
+    .hero-top {
+      display: flex;
+      align-items: center;
+      gap: 17px;
+      margin-bottom: 15px;
+    }
+
+    .club-logo {
+      width: 85px;
+      height: 85px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .hero-text {
+      min-width: 0;
+    }
+
+    .club-name {
+      color: var(--orio-horia);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 2px;
     }
 
     .hero h1 {
-      margin: 0 0 10px;
-      font-size: 27px;
+      color: white;
+      font-size: 24px;
+      line-height: 1.2;
+      margin: 7px 0 0;
     }
 
     .hero p {
-      margin: 0;
+      color: #eeeeee;
+      font-size: 14px;
       line-height: 1.5;
-      opacity: 0.91;
+      margin: 0;
     }
+
+    /* FORMULARIOA */
 
     .content {
       background: white;
@@ -63,39 +116,51 @@
     }
 
     .note {
-      padding: 12px 14px;
+      padding: 13px 15px;
       border-radius: 10px;
-      background: #edf5fa;
-      color: #24445b;
+      background: #fff8d9;
+      color: #39320a;
+      border-left: 4px solid var(--orio-horia);
       font-size: 13px;
-      line-height: 1.45;
-      margin-bottom: 20px;
+      line-height: 1.5;
+      margin-bottom: 24px;
     }
 
     label,
     legend {
       display: block;
       font-weight: 700;
-      margin-bottom: 9px;
+      margin-bottom: 10px;
+    }
+
+    legend {
+      line-height: 1.4;
     }
 
     section {
-      margin-bottom: 26px;
+      margin-bottom: 27px;
     }
 
     select,
     textarea {
       width: 100%;
-      padding: 12px;
-      border: 1px solid #ccd6df;
-      border-radius: 9px;
+      padding: 13px;
+      border: 1px solid #d1d1d1;
+      border-radius: 10px;
       background: white;
+      color: #222222;
       font: inherit;
+    }
+
+    select:focus,
+    textarea:focus {
+      outline: 2px solid var(--orio-horia);
+      outline-offset: 1px;
     }
 
     textarea {
       resize: vertical;
-      min-height: 75px;
+      min-height: 85px;
     }
 
     fieldset {
@@ -105,11 +170,12 @@
       min-width: 0;
     }
 
-    /* BALORAZIOAK: 1-5 */
+    /* 1-5 BALORAZIOAK */
 
     .scale {
       display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-template-columns:
+        repeat(5, minmax(0, 1fr));
       gap: 8px;
     }
 
@@ -128,24 +194,28 @@
       gap: 8px;
 
       min-width: 0;
-      min-height: 100px;
+      min-height: 105px;
       padding: 13px 4px;
 
-      border: 1px solid #cdd9e3;
-      border-radius: 10px;
+      border: 1px solid #dedede;
+      border-radius: 11px;
       background: white;
+      color: var(--orio-beltza);
 
       cursor: pointer;
       text-align: center;
       font-weight: 400;
       margin: 0;
 
-      transition: background 0.2s, border-color 0.2s;
+      transition:
+        background 0.2s,
+        border-color 0.2s,
+        transform 0.15s;
     }
 
     .scale label strong {
       display: block;
-      font-size: 24px;
+      font-size: 25px;
       font-weight: 800;
       line-height: 1.1;
     }
@@ -159,17 +229,23 @@
     }
 
     .scale input:checked + label {
-      background: #113a58;
-      color: white;
-      border-color: #113a58;
+      background: var(--orio-horia);
+      color: var(--orio-beltza);
+      border-color: #cda600;
     }
 
     .scale input:focus-visible + label {
-      outline: 3px solid #7ab5df;
+      outline: 3px solid #806a00;
       outline-offset: 2px;
     }
 
-    /* SENSAZIOAK */
+    @media (hover: hover) {
+      .scale label:hover {
+        border-color: var(--orio-horia);
+      }
+    }
+
+    /* ZELAIKO SENTSAZIOAK */
 
     .feelings {
       display: grid;
@@ -179,24 +255,28 @@
     .feelings label {
       display: flex;
       align-items: center;
-      gap: 9px;
+      gap: 10px;
 
       font-weight: 500;
-      border: 1px solid #d3dfe7;
+      border: 1px solid #dedede;
       border-radius: 10px;
-      padding: 12px;
+      padding: 13px;
       cursor: pointer;
       margin: 0;
+
+      transition:
+        background 0.2s,
+        border-color 0.2s;
     }
 
     .feelings label:has(input:checked) {
-      background: #edf5fa;
-      border-color: #113a58;
+      background: #fff8d9;
+      border-color: #d1aa00;
     }
 
     .feelings input {
       margin: 0;
-      accent-color: #113a58;
+      accent-color: var(--orio-beltza);
       flex-shrink: 0;
     }
 
@@ -204,14 +284,24 @@
 
     button {
       width: 100%;
-      background: #113a58;
+      background: var(--orio-beltza);
       color: white;
-      border: 0;
+      border: 2px solid var(--orio-beltza);
       border-radius: 11px;
-      padding: 15px 20px;
+      padding: 16px 20px;
       font-size: 16px;
       font-weight: 700;
       cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover:not(:disabled) {
+      background: #343434;
+    }
+
+    button:focus-visible {
+      outline: 3px solid #cda600;
+      outline-offset: 3px;
     }
 
     button:disabled {
@@ -219,14 +309,16 @@
       cursor: wait;
     }
 
+    /* MEZUAK */
+
     .muted {
-      color: #637689;
+      color: #666666;
       font-size: 12px;
       line-height: 1.5;
     }
 
     .msg {
-      margin-top: 15px;
+      margin-top: 16px;
       font-weight: 600;
       line-height: 1.5;
     }
@@ -239,25 +331,39 @@
       color: #17693d;
     }
 
-    /* MUGIKORRA */
+    /* MUGIKORREKO DISEINUA */
 
     @media (max-width: 420px) {
+
       .wrap {
         margin: 0 auto;
         padding: 0;
       }
 
       .hero {
-        padding: 24px 20px;
+        padding: 23px 18px;
         border-radius: 0;
       }
 
+      .hero-top {
+        gap: 12px;
+      }
+
+      .club-logo {
+        width: 65px;
+        height: 65px;
+      }
+
+      .club-name {
+        font-size: 11px;
+      }
+
       .hero h1 {
-        font-size: 24px;
+        font-size: 21px;
       }
 
       .content {
-        padding: 20px 16px;
+        padding: 21px 16px;
         border-radius: 0;
       }
 
@@ -267,7 +373,7 @@
 
       .scale label {
         padding: 12px 2px;
-        min-height: 100px;
+        min-height: 104px;
         gap: 7px;
       }
 
@@ -281,12 +387,13 @@
     }
 
     @media (max-width: 350px) {
+
       .scale {
         gap: 3px;
       }
 
       .scale label {
-        padding: 9px 1px;
+        padding: 10px 1px;
       }
 
       .scale-meaning {
@@ -301,12 +408,32 @@
 
 <main class="wrap">
 
+  <!-- GOIBURUA -->
+
   <header class="hero">
-    <h1>⚽ Partida osteko balorazioa</h1>
-    <p>Orioko FT · Zure iritzia garrantzitsua da!</p>
+
+    <div class="hero-top">
+
+      <img
+        src="/LOGOTIPO.png"
+        alt="Orioko FT logotipoa"
+        class="club-logo"
+      >
+
+      <div class="hero-text">
+        <span class="club-name">ORIOKO FT</span>
+        <h1>Partida osteko balorazioa</h1>
+      </div>
+
+    </div>
+
+    <p>Zure iritzia garrantzitsua da!</p>
+
   </header>
 
   <div class="content">
+
+    <!-- ANONIMOTASUN OHARRA -->
 
     <div class="note">
       🔒 Ez dugu izenik edo emailik eskatuko.
@@ -317,24 +444,34 @@
 
     <form id="form">
 
-      <!-- PARTIDA AUKERATU -->
+      <!-- PARTIDA -->
 
       <section>
+
         <label for="partidaId">
           Zein partida baloratu nahi duzu?
         </label>
 
-        <select id="partidaId" name="partidaId" required>
-          <option value="">Partidak kargatzen...</option>
+        <select
+          id="partidaId"
+          name="partidaId"
+          required
+        >
+          <option value="">
+            Partidak kargatzen...
+          </option>
         </select>
+
       </section>
 
       <!-- 1-4 GALDERAK -->
+
       <div id="ratingBlocks"></div>
 
       <!-- 5. SENTSAZIOAK -->
 
       <section>
+
         <fieldset>
 
           <legend>
@@ -348,7 +485,8 @@
                 required
                 type="radio"
                 name="sentsazioa"
-                value="Oso ondo">
+                value="Oso ondo"
+              >
               😄 Oso ondo, konfiantza handiarekin
             </label>
 
@@ -356,7 +494,8 @@
               <input
                 type="radio"
                 name="sentsazioa"
-                value="Ondo">
+                value="Ondo"
+              >
               🙂 Ondo
             </label>
 
@@ -364,7 +503,8 @@
               <input
                 type="radio"
                 name="sentsazioa"
-                value="Hala-hola">
+                value="Hala-hola"
+              >
               😐 Hala-hola
             </label>
 
@@ -372,17 +512,21 @@
               <input
                 type="radio"
                 name="sentsazioa"
-                value="Gaizki">
+                value="Gaizki"
+              >
               😟 Gaizki edo frustratuta
             </label>
 
           </div>
+
         </fieldset>
+
       </section>
 
       <!-- 6. ONDO EGINDAKOA -->
 
       <section>
+
         <label for="ondo">
           6. Zer egin duzu ondo gaurko partidan?
         </label>
@@ -390,12 +534,15 @@
         <textarea
           id="ondo"
           maxlength="1000"
-          placeholder="Adibidez: paseak, kokapena, komunikazioa..."></textarea>
+          placeholder="Adibidez: paseak, kokapena, komunikazioa..."
+        ></textarea>
+
       </section>
 
       <!-- 7. HOBETZEKOAK -->
 
       <section>
+
         <label for="hobetu">
           7. Zer hobetu behar duzula uste duzu?
         </label>
@@ -403,12 +550,15 @@
         <textarea
           id="hobetu"
           maxlength="1000"
-          placeholder="Adibidez: erabakiak hartzea, kontzentrazioa..."></textarea>
+          placeholder="Adibidez: erabakiak hartzea, kontzentrazioa..."
+        ></textarea>
+
       </section>
 
-      <!-- 8. ENTRENATZAILEENTZAKO OHARRAK -->
+      <!-- 8. OHARRAK -->
 
       <section>
+
         <label for="oharrak">
           8. Zerbait esan nahi diozu entrenatzaile-taldeari?
         </label>
@@ -416,7 +566,9 @@
         <textarea
           id="oharrak"
           maxlength="1000"
-          placeholder="Aukerakoa"></textarea>
+          placeholder="Aukerakoa"
+        ></textarea>
+
       </section>
 
       <!-- BIDALI -->
@@ -429,8 +581,8 @@
         class="msg"
         id="msg"
         role="status"
-        aria-live="polite">
-      </div>
+        aria-live="polite"
+      ></div>
 
     </form>
 
@@ -441,13 +593,15 @@
     </p>
 
   </div>
+
 </main>
 
 <script>
 
-  /* GALDERAK ETA BALORAZIOEN ESANAHIA */
+  /* GALDERAK */
 
   const questions = [
+
     {
       key: 'ahalegina',
       question: '1. Zenbateko ahalegina egin duzu?',
@@ -459,6 +613,7 @@
         'Ahaleginik handiena'
       ]
     },
+
     {
       key: 'jarduna',
       question: '2. Nola baloratzen duzu zure jarduna?',
@@ -470,6 +625,7 @@
         'Oso ondo'
       ]
     },
+
     {
       key: 'taktika',
       question: '3. Zure eginkizun taktikoak bete dituzu?',
@@ -481,6 +637,7 @@
         'Guztiak'
       ]
     },
+
     {
       key: 'taldea',
       question: '4. Nola baloratzen duzu taldearen jarduna?',
@@ -492,76 +649,105 @@
         'Oso ondo'
       ]
     }
+
   ];
 
   /* BALORAZIO BOTOIAK SORTU */
 
-  const container = document.querySelector('#ratingBlocks');
+  const container =
+    document.querySelector('#ratingBlocks');
 
   questions.forEach(({key, question, meanings}) => {
 
-    const section = document.createElement('section');
-    const fieldset = document.createElement('fieldset');
+    const section =
+      document.createElement('section');
 
-    const legend = document.createElement('legend');
+    const fieldset =
+      document.createElement('fieldset');
+
+    const legend =
+      document.createElement('legend');
+
     legend.textContent = question;
+
     fieldset.append(legend);
 
-    const scale = document.createElement('div');
+    const scale =
+      document.createElement('div');
+
     scale.className = 'scale';
 
     for (let i = 1; i <= 5; i++) {
 
-      const input = document.createElement('input');
+      const input =
+        document.createElement('input');
+
       input.type = 'radio';
       input.name = key;
       input.id = key + i;
       input.value = i;
       input.required = true;
 
-      const label = document.createElement('label');
+      const label =
+        document.createElement('label');
+
       label.htmlFor = input.id;
       label.title = meanings[i - 1];
 
-      const number = document.createElement('strong');
+      const number =
+        document.createElement('strong');
+
       number.textContent = i;
 
-      const meaning = document.createElement('span');
+      const meaning =
+        document.createElement('span');
+
       meaning.className = 'scale-meaning';
       meaning.textContent = meanings[i - 1];
 
       label.append(number, meaning);
+
       scale.append(input, label);
     }
 
     fieldset.append(scale);
     section.append(fieldset);
     container.append(section);
+
   });
 
-  /* PARTIDAK GOOGLE SHEETSETIK KARGATU */
+  /* PARTIDAK KARGATU */
 
   async function load() {
 
-    const select = document.querySelector('#partidaId');
-    const msg = document.querySelector('#msg');
+    const select =
+      document.querySelector('#partidaId');
+
+    const msg =
+      document.querySelector('#msg');
 
     try {
 
-      const response = await fetch('/api/balorazioa', {
-        cache: 'no-store'
-      });
+      const response = await fetch(
+        '/api/balorazioa',
+        {cache: 'no-store'}
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Errorea');
+        throw new Error(
+          data.error || 'Errorea'
+        );
       }
 
       select.replaceChildren();
 
-      const first = document.createElement('option');
+      const first =
+        document.createElement('option');
+
       first.value = '';
+
       first.textContent = data.partidak.length
         ? 'Aukeratu partida'
         : 'Ez dago partida irekirik';
@@ -570,11 +756,14 @@
 
       data.partidak.forEach(partida => {
 
-        const option = document.createElement('option');
+        const option =
+          document.createElement('option');
+
         option.value = partida.id;
         option.textContent = partida.izena;
 
         select.append(option);
+
       });
 
       msg.textContent = '';
@@ -583,31 +772,41 @@
     } catch (error) {
 
       select.replaceChildren(
-        new Option('Ezin izan dira partidak kargatu', '')
+        new Option(
+          'Ezin izan dira partidak kargatu',
+          ''
+        )
       );
 
       msg.textContent =
-        'Ezin izan dira partidak kargatu. Egiaztatu konfigurazioa.';
+        'Ezin izan dira partidak kargatu. '
+        + 'Egiaztatu konfigurazioa.';
 
       msg.className = 'msg error';
+
     }
+
   }
 
   load();
 
   /* BALORAZIOA BIDALI */
 
-  document.querySelector('#form').addEventListener(
-    'submit',
-    async event => {
+  document.querySelector('#form')
+    .addEventListener('submit', async event => {
 
       event.preventDefault();
 
       const form = event.currentTarget;
-      const button = document.querySelector('#send');
-      const msg = document.querySelector('#msg');
+
+      const button =
+        document.querySelector('#send');
+
+      const msg =
+        document.querySelector('#msg');
 
       button.disabled = true;
+
       msg.textContent = 'Bidaltzen...';
       msg.className = 'msg';
 
@@ -616,36 +815,55 @@
         const formData = new FormData(form);
 
         const data = {
+
           partidaId: formData.get('partidaId'),
+
           sentsazioa: formData.get('sentsazioa'),
+
           ondo: document.querySelector('#ondo').value,
+
           hobetu: document.querySelector('#hobetu').value,
+
           oharrak: document.querySelector('#oharrak').value
+
         };
 
-        // 1-5 BALORAZIOAK
+        /* 1-5 BALORAZIOAK */
+
         for (const {key} of questions) {
-          data[key] = Number(formData.get(key));
+
+          data[key] = Number(
+            formData.get(key)
+          );
+
         }
 
-        const response = await fetch('/api/balorazioa', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(data)
-        });
+        const response = await fetch(
+          '/api/balorazioa',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+          }
+        );
 
         const result = await response.json();
 
         if (!response.ok) {
-          throw new Error(result.error || 'Ezin izan da gorde');
+
+          throw new Error(
+            result.error || 'Ezin izan da gorde'
+          );
+
         }
 
         form.reset();
 
         msg.textContent =
-          '✅ Eskerrik asko! Zure balorazioa gorde da.';
+          '✅ Eskerrik asko! '
+          + 'Zure balorazioa gorde da.';
 
         msg.className = 'msg ok';
 
@@ -656,15 +874,18 @@
 
       } catch (error) {
 
-        msg.textContent = '❌ ' + error.message;
+        msg.textContent =
+          '❌ ' + error.message;
+
         msg.className = 'msg error';
 
       } finally {
 
         button.disabled = false;
+
       }
-    }
-  );
+
+    });
 
 </script>
 
