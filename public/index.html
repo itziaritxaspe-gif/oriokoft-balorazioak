@@ -719,64 +719,112 @@
   /* PARTIDAK KARGATU */
 
 
-    async function load() {
+    
+async function load() {
 
-    const select = document.querySelector('#partidaId');
-    const msg = document.querySelector('#msg');
+  const select = document.querySelector('#partidaId');
+  const msg = document.querySelector('#msg');
 
-    try {
+  // Gaurko eguna, erabiltzailearen ordu-eremuan
+  const gaur = new Date();
+  gaur.setHours(23, 59, 59, 999);
 
-        const response = await fetch('/api/balorazioa', {
-        cache: 'no-store'
-        });
+  // Google Sheets-eko datak irakurri
+  function parseDate(value) {
+    if (!value) return null;
 
-        const data = await response.json();
+    const match = String(value).match(
+      /^(\d{1,2})\/(\d{1,2})\/(\d{4})/
+    );
 
-        if (!response.ok) {
-        throw new Error(data.error || 'Errorea');
-        }
+    if (!match) return null;
 
-        select.replaceChildren();
+    const eguna = Number(match[1]);
+    const hilabetea = Number(match[2]);
+    const urtea = Number(match[3]);
 
-        const first = document.createElement('option');
-        first.value = '';
-        first.textContent = 'Aukeratu partida';
-        select.append(first);
+    const date = new Date(
+      urtea,
+      hilabetea - 1,
+      eguna
+    );
 
-        // Partida guztiak gehitu
-        data.partidak.forEach(partida => {
-
-        const option = document.createElement('option');
-
-        option.value = partida.id;
-        option.textContent = partida.izena;
-
-        select.append(option);
-        });
-
-        // Azken partida automatikoki aukeratu
-        if (data.partidak.length > 0) {
-
-        const azkenPartida = data.partidak[data.partidak.length - 1];
-
-        select.value = azkenPartida.id;
-        }
-
-        msg.textContent = '';
-        msg.className = 'msg';
-
-    } catch (error) {
-
-        select.replaceChildren(
-        new Option('Ezin izan dira partidak kargatu', '')
-        );
-
-        msg.textContent =
-        'Ezin izan dira partidak kargatu. Egiaztatu konfigurazioa.';
-
-        msg.className = 'msg error';
+    // Data baliogabeak baztertu
+    if (
+      date.getFullYear() !== urtea ||
+      date.getMonth() !== hilabetea - 1 ||
+      date.getDate() !== eguna
+    ) {
+      return null;
     }
+
+    return date;
+  }
+
+  try {
+
+    const response = await fetch('/api/balorazioa', {
+      cache: 'no-store'
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Errorea');
     }
+
+    select.replaceChildren();
+
+    const first = new Option('Aukeratu partida', '');
+    select.append(first);
+
+    const partidak = data.partidak || [];
+
+    partidak.forEach(partida => {
+      const option = new Option(
+        partida.izena,
+        partida.id
+      );
+      select.append(option);
+    });
+
+    // Gaur arte jokatutako partidak soilik
+    const jokatutakoak = partidak
+      .map(p => ({
+        ...p,
+        parsedDate: parseDate(p.data)
+      }))
+      .filter(p =>
+        p.parsedDate &&
+        p.parsedDate <= gaur
+      )
+      .sort((a, b) =>
+        b.parsedDate - a.parsedDate
+      );
+
+    // Azken jokatutako partida aukeratu
+    if (jokatutakoak.length > 0) {
+      select.value = jokatutakoak[0].id;
+    }
+
+    msg.textContent = '';
+    msg.className = 'msg';
+
+  } catch (error) {
+
+    select.replaceChildren(
+      new Option(
+        'Ezin izan dira partidak kargatu',
+        ''
+      )
+    );
+
+    msg.textContent =
+      'Ezin izan dira partidak kargatu.';
+
+    msg.className = 'msg error';
+  }
+}
 
   load();
 
