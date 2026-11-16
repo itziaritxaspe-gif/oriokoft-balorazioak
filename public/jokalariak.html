@@ -5,12 +5,76 @@
 :root{font:16px system-ui,-apple-system,Segoe UI,sans-serif;color:#171717;background:#f5f5f2;--yellow:#f2c500}*{box-sizing:border-box}body{margin:0}.wrap{max-width:610px;margin:24px auto;padding:0 16px}.hero{background:#171717;color:#fff;border-bottom:5px solid var(--yellow);border-radius:18px 18px 0 0;padding:24px}.hero-top{display:flex;align-items:center;gap:16px}.hero img{width:73px;height:73px;object-fit:contain}.hero h1{font-size:24px;margin:4px 0}.club{font-weight:800;color:var(--yellow);font-size:13px;letter-spacing:1.5px}.hero p{margin:15px 0 0}.main{background:#fff;border-radius:0 0 18px 18px;padding:25px;box-shadow:0 10px 25px #0001}.back{font-size:13px;font-weight:700;color:#171717;text-decoration:none;display:inline-block;margin-bottom:18px}.note{padding:14px;background:#fff8d9;border-left:4px solid var(--yellow);border-radius:9px;font-size:13px;line-height:1.5;margin-bottom:22px}section{margin:0 0 25px}label,legend{display:block;font-weight:700;margin-bottom:9px}select,textarea{width:100%;border:1px solid #d1d1d1;border-radius:9px;background:white;color:#171717;padding:13px;font:inherit}textarea{min-height:82px;resize:vertical}fieldset{border:0;margin:0;padding:0;min-width:0}.scale{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}.scale input{position:absolute;opacity:0;width:1px;height:1px}.scale label{margin:0;display:flex;flex-direction:column;align-items:center;gap:8px;border:1px solid #dedede;border-radius:10px;min-height:105px;padding:12px 3px;font-weight:400;text-align:center;cursor:pointer}.scale strong{font-size:24px}.scale small{font-size:11px;line-height:1.3;overflow-wrap:anywhere}.scale input:checked+label{background:var(--yellow);border-color:#bd9b00}.scale input:focus-visible+label{outline:3px solid #806a00;outline-offset:2px}.feelings{display:grid;gap:9px}.feelings label{display:flex;gap:9px;align-items:center;border:1px solid #ddd;border-radius:10px;padding:12px;font-weight:400;margin:0}.feelings label:has(input:checked){background:#fff8d9;border-color:#bd9b00}.feelings input{accent-color:#171717}button{width:100%;background:#171717;color:#fff;border:0;border-radius:10px;padding:16px;font-weight:700;font:inherit;cursor:pointer}button:disabled{opacity:.6}.msg{font-weight:700;margin:14px 0}.error{color:#a22727}.ok{color:#17693d}.muted{color:#666;font-size:12px;line-height:1.6}@media(max-width:440px){.wrap{margin:0;padding:0}.hero{border-radius:0;padding:20px}.hero img{width:60px;height:60px}.hero h1{font-size:21px}.main{border-radius:0;padding:20px 15px}.scale{gap:4px}.scale label{padding:11px 2px;min-height:103px}.scale strong{font-size:21px}.scale small{font-size:10px}}
 </style></head><body><div class="wrap"><header class="hero"><div class="hero-top"><img src="/LOGOTIPO.png" alt="Orioko FT logotipoa"><div><div class="club">ORIOKO FT</div><h1>Partida osteko balorazioa</h1></div></div><p>Zure iritzia garrantzitsua da!</p></header><main class="main"><a href="/" class="back">← Hasierako menura itzuli</a><div class="note">🔒 Ez dugu izenik edo emailik eskatuko. Zure iritzia entrenatzaile-taldeak aztertuko du. Ez jarri identifika zaitzakeen daturik testuetan.</div><form id="form"><section><label for="taldeId">Zein taldetakoa zara?</label><select id="taldeId" required><option value="">Taldeak kargatzen...</option></select></section><section><label for="partidaId">Zein partida baloratu nahi duzu?</label><select id="partidaId" required><option value="">Lehenik, aukeratu taldea</option></select></section><div id="ratingBlocks"></div><section><fieldset><legend>5. Nola sentitu zara zelaian?</legend><div class="feelings"><label><input required type="radio" name="sentsazioa" value="Oso ondo"> 😄 Oso ondo, konfiantza handiarekin</label><label><input type="radio" name="sentsazioa" value="Ondo"> 🙂 Ondo</label><label><input type="radio" name="sentsazioa" value="Hala-hola"> 😐 Hala-hola</label><label><input type="radio" name="sentsazioa" value="Gaizki"> 😟 Gaizki edo frustratuta</label></div></fieldset></section><section><label for="ondo">6. Zer egin duzu ondo gaurko partidan?</label><textarea id="ondo" maxlength="1000" placeholder="Adibidez: paseak, kokapena, komunikazioa..."></textarea></section><section><label for="hobetu">7. Zer hobetu behar duzula uste duzu?</label><textarea id="hobetu" maxlength="1000" placeholder="Adibidez: erabakiak hartzea, kontzentrazioa..."></textarea></section><section><label for="oharrak">8. Zerbait esan nahi diozu entrenatzaile-taldeari?</label><textarea id="oharrak" maxlength="1000" placeholder="Aukerakoa"></textarea></section><button id="send" type="submit">Bidali balorazioa</button><p id="msg" class="msg" role="status" aria-live="polite"></p></form><p class="muted">Erantzunak izenik gabe gordetzen dira. Ezin da ziurtatu pertsona bakoitzak behin bakarrik erantzuten duela.</p></main></div>
 <script>
-const questions=[
-{key:'ahalegina',question:'1. Zenbateko ahalegina egin duzu?',meanings:['Oso ahalegin txikia','Ahalegin txikia','Ahalegin ertaina','Ahalegin handia','Ahaleginik handiena']},
-{key:'jarduna',question:'2. Nola baloratzen duzu zure jarduna?',meanings:['Oso gaizki','Gaizki','Erdipurdi','Ondo','Oso ondo']},
-{key:'taktika',question:'3. Zure eginkizun taktikoak bete dituzu?',meanings:['Batere ez','Gutxi','Neurri batean','Gehienak','Guztiak']},
-{key:'taldea',question:'4. Nola baloratzen duzu taldearen jarduna?',meanings:['Oso gaizki','Gaizki','Erdipurdi','Ondo','Oso ondo']}
+
+const questions = [
+  {
+    key: 'mentala',
+    question: '1. Nola sentitzen zinen mentalki partida hasi aurretik?',
+    meanings: [
+      'Oso gaizki',
+      'Gaizki',
+      'Hala-hola',
+      'Ondo',
+      'Oso ondo'
+    ]
+  },
+  {
+    key: 'fisikoa',
+    question: '2. Nola sentitzen zinen fisikoki partida hasi aurretik?',
+    meanings: [
+      'Oso nekatuta',
+      'Nekatuta',
+      'Hala-hola',
+      'Indartsu',
+      'Oso indartsu'
+    ]
+  },
+  {
+    key: 'ahalegina',
+    question: '3. Zenbateko ahalegina egin duzu?',
+    meanings: [
+      'Oso ahalegin txikia',
+      'Ahalegin txikia',
+      'Ahalegin ertaina',
+      'Ahalegin handia',
+      'Ahaleginik handiena'
+    ]
+  },
+  {
+    key: 'jarduna',
+    question: '4. Nola baloratzen duzu zure jarduna?',
+    meanings: [
+      'Oso gaizki',
+      'Gaizki',
+      'Erdipurdi',
+      'Ondo',
+      'Oso ondo'
+    ]
+  },
+  {
+    key: 'taktika',
+    question: '5. Zure eginkizun taktikoak bete dituzu?',
+    meanings: [
+      'Batere ez',
+      'Gutxi',
+      'Neurri batean',
+      'Gehienak',
+      'Guztiak'
+    ]
+  },
+  {
+    key: 'taldea',
+    question: '6. Nola baloratzen duzu taldearen jarduna?',
+    meanings: [
+      'Oso gaizki',
+      'Gaizki',
+      'Erdipurdi',
+      'Ondo',
+      'Oso ondo'
+    ]
+  }
 ];
+
 const $=s=>document.querySelector(s);let games=[];
 for(const {key,question,meanings} of questions){const section=document.createElement('section'),fs=document.createElement('fieldset'),legend=document.createElement('legend'),scale=document.createElement('div');legend.textContent=question;scale.className='scale';fs.append(legend);for(let i=1;i<=5;i++){const input=document.createElement('input'),label=document.createElement('label'),number=document.createElement('strong'),meaning=document.createElement('small');input.type='radio';input.name=key;input.id=key+i;input.value=i;input.required=true;label.htmlFor=input.id;number.textContent=i;meaning.textContent=meanings[i-1];label.append(number,meaning);scale.append(input,label);}fs.append(scale);section.append(fs);$('#ratingBlocks').append(section);}
 function updateGames(){const id=$('#taldeId').value,sel=$('#partidaId');sel.replaceChildren(new Option('Aukeratu partida',''));const list=games.filter(g=>g.taldeId===id).sort((a,b)=>b.dataISO.localeCompare(a.dataISO));for(const g of list)sel.add(new Option(`${g.izena} · ${g.data.split(' ')[0]}`,g.id));if(list.length)sel.value=list[0].id;else sel.options[0].textContent=id?'Ez dago partida irekirik':'Lehenik, aukeratu taldea';}
