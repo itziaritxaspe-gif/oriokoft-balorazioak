@@ -718,75 +718,65 @@
 
   /* PARTIDAK KARGATU */
 
-  async function load() {
 
-    const select =
-      document.querySelector('#partidaId');
+    async function load() {
 
-    const msg =
-      document.querySelector('#msg');
+    const select = document.querySelector('#partidaId');
+    const msg = document.querySelector('#msg');
 
     try {
 
-      const response = await fetch(
-        '/api/balorazioa',
-        {cache: 'no-store'}
-      );
+        const response = await fetch('/api/balorazioa', {
+        cache: 'no-store'
+        });
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(
-          data.error || 'Errorea'
-        );
-      }
+        if (!response.ok) {
+        throw new Error(data.error || 'Errorea');
+        }
 
-      select.replaceChildren();
+        select.replaceChildren();
 
-      const first =
-        document.createElement('option');
+        const first = document.createElement('option');
+        first.value = '';
+        first.textContent = 'Aukeratu partida';
+        select.append(first);
 
-      first.value = '';
+        // Partida guztiak gehitu
+        data.partidak.forEach(partida => {
 
-      first.textContent = data.partidak.length
-        ? 'Aukeratu partida'
-        : 'Ez dago partida irekirik';
-
-      select.append(first);
-
-      data.partidak.forEach(partida => {
-
-        const option =
-          document.createElement('option');
+        const option = document.createElement('option');
 
         option.value = partida.id;
         option.textContent = partida.izena;
 
         select.append(option);
+        });
 
-      });
+        // Azken partida automatikoki aukeratu
+        if (data.partidak.length > 0) {
 
-      msg.textContent = '';
-      msg.className = 'msg';
+        const azkenPartida = data.partidak[data.partidak.length - 1];
+
+        select.value = azkenPartida.id;
+        }
+
+        msg.textContent = '';
+        msg.className = 'msg';
 
     } catch (error) {
 
-      select.replaceChildren(
-        new Option(
-          'Ezin izan dira partidak kargatu',
-          ''
-        )
-      );
+        select.replaceChildren(
+        new Option('Ezin izan dira partidak kargatu', '')
+        );
 
-      msg.textContent =
-        'Ezin izan dira partidak kargatu. '
-        + 'Egiaztatu konfigurazioa.';
+        msg.textContent =
+        'Ezin izan dira partidak kargatu. Egiaztatu konfigurazioa.';
 
-      msg.className = 'msg error';
-
+        msg.className = 'msg error';
     }
-
-  }
+    }
 
   load();
 
