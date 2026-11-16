@@ -19,7 +19,16 @@ async function token() {
 async function sheet(range, accessToken, opts={}) {
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(SPREADSHEET_ID)}/values/${encodeURIComponent(range)}${opts.append?':append':''}`+(opts.append?'?valueInputOption=RAW&insertDataOption=INSERT_ROWS':'');
   const response = await fetch(url,{method:opts.append?'POST':'GET',headers:{Authorization:`Bearer ${accessToken}`,...(opts.append?{'Content-Type':'application/json'}:{})},...(opts.append?{body:JSON.stringify({values:opts.values})}:{})});
-  if(!response.ok) throw new Error('Google Sheets errorea: '+response.status);
+  if (!response.ok) {
+  const detalle = await response.json().catch(() => ({}));
+  console.error('Google Sheets API:', {
+    status: response.status,
+    code: detalle.error?.code,
+    reason: detalle.error?.errors?.[0]?.reason,
+    message: detalle.error?.message
+  });
+  throw new Error('Google Sheets errorea: ' + response.status);
+}
   return response.json();
 }
 function sanitize(x) {
